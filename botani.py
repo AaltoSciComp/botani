@@ -3,8 +3,10 @@
 import RPi.GPIO as gpio
 import iio
 import time
+from influxdb import InfluxDBClient
 
 ADS_1115_SCALE = '0.1875'
+DB_NAME = 'plantdb-test'
 
 def sample_plants(devs, config):
     gpio.output(config['sensor_power_gpio'], gpio.HIGH)
@@ -19,6 +21,14 @@ def sample_plants(devs, config):
     gpio.output(config['sensor_power_gpio'], gpio.LOW)
 
     return results
+
+def db_log(client, moisture):
+    entry = []
+    for (plant, value) in moisture.items():
+        print(plant, value)
+
+def db_create(client):
+    client.create_database(DB_NAME)
 
 def main():
     config = {
@@ -41,7 +51,15 @@ def main():
     gpio.setmode(gpio.BOARD)
     gpio.setup(config['sensor_power_gpio'], gpio.OUT)
 
-    print(sample_plants(devs, config))
+    client = InfluxDBClient('localhost', 80)
+
+    if {'name': DB_NAME} not in client.get_list_database():
+        db_create(client)
+
+    moisture_data = sample_plants(devs, config)
+    print(moisture_data)
+
+    db_log(client, moisture_data)
 
     gpio.cleanup()
 

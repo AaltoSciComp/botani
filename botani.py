@@ -16,7 +16,7 @@ def sample_plants(devs, config):
     for plant in config['plants']:
         chan = devs[plant['sensor']].channels[plant['channel']]
         chan.attrs['scale'].value = ADS_1115_SCALE
-        results[plant['name']] = chan.attrs['raw'].value
+        results[plant['name']] = float(chan.attrs['raw'].value)
 
     gpio.output(config['sensor_power_gpio'], gpio.LOW)
 

@@ -3,6 +3,7 @@
 import RPi.GPIO as gpio
 import iio
 import time
+import datetime
 from influxdb import InfluxDBClient
 
 ADS_1115_SCALE = '0.1875'
@@ -22,17 +23,28 @@ def sample_plants(devs, config):
 
     return results
 
-def db_log(client, moisture):
-    entry = []
-    for (plant, value) in moisture.items():
-        print(plant, value)
+def db_log(client, measurements):
+    points = []
+    for (plant, moisture) in measurements.items():
+        point = {
+            'time': str(datetime.datetime.utcnow()),
+            'measurement': 'plant-moisture',
+            'tags': {
+                'plant': plant
+            },
+            'fields': {
+                'value': float(moisture)
+            }
+        }
+        points.append(point)
 
-def db_create(client):
-    client.create_database(DB_NAME)
+    print(points)
+    print(client.write_points(points))
 
 def main():
     config = {
         'sensor_power_gpio': 11,
+        'sampling_interval': 5,
         'plants': [
             {
                 'sensor': 0,
@@ -54,14 +66,18 @@ def main():
     client = InfluxDBClient('localhost', 80)
 
     if {'name': DB_NAME} not in client.get_list_database():
-        db_create(client)
+        client.create_database(DB_NAME)
+    client.switch_database(DB_NAME)
 
-    moisture_data = sample_plants(devs, config)
-    print(moisture_data)
+    try:
+        while True:
+            moisture_data = sample_plants(devs, config)
+            print(moisture_data)
 
-    db_log(client, moisture_data)
-
-    gpio.cleanup()
+            db_log(client, moisture_data)
+            time.sleep(config['sampling_interval'])
+    finally:
+        gpio.cleanup()
 
 if __name__ == "__main__":
     main()

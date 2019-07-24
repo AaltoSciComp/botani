@@ -5,6 +5,7 @@ import iio
 import time
 import datetime
 from influxdb import InfluxDBClient
+import json
 
 ADS_1115_SCALE = '0.1875'
 DB_NAME = 'plantdb-test'
@@ -42,18 +43,8 @@ def db_log(client, measurements):
     print(client.write_points(points))
 
 def main():
-    config = {
-        'sensor_power_gpio': 11,
-        'sampling_interval': 5,
-        'plants': [
-            {
-                'sensor': 0,
-                'channel': 1,
-                'scale': 0.1875,
-                'name': 'parsa',
-            }
-        ]
-    }
+    with open('botani.conf') as f:
+        config = json.loads(f.read())
 
     ctx = iio.Context()
     devs = list(filter(lambda dev: dev.name == "ads1015", ctx.devices))

@@ -1,0 +1,9 @@
+[Unit]
+Description = Botani measurement service
+
+[Service]
+# XXX Assumes default setup.py PREFIX
+ExecStart = /usr/local/bin/botani -c /etc/botani.conf
+
+[Install]
+WantedBy = multi-user.target

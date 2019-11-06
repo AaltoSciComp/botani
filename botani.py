@@ -8,7 +8,6 @@ from influxdb import InfluxDBClient
 import json
 
 ADS_1115_SCALE = '0.1875'
-DB_NAME = 'plantdb-test'
 
 def sample_plants(devs, config):
     gpio.output(config['sensor_power_gpio'], gpio.HIGH)
@@ -54,11 +53,12 @@ def main():
     gpio.setmode(gpio.BOARD)
     gpio.setup(config['sensor_power_gpio'], gpio.OUT)
 
-    client = InfluxDBClient('localhost', 80)
+    client = InfluxDBClient(**config['influxdb'])
 
-    if {'name': DB_NAME} not in client.get_list_database():
-        client.create_database(DB_NAME)
-    client.switch_database(DB_NAME)
+    db_name = config['influxdb']['database']
+    if {'name': db_name} not in client.get_list_database():
+        client.create_database(db_name)
+    client.switch_database(db_name)
 
     try:
         while True:

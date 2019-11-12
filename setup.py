@@ -25,7 +25,7 @@ setup(
         ]
     },
     data_files = [
-        ('/etc/', ['botani.conf']),
+        ('/etc/', ['botani-plants.conf', 'botani-influxdb.conf']),
     ] + systemd_service_data_file,
     install_requires=['RPi.GPIO', 'influxdb'],
 )

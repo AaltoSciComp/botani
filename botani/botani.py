@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import RPi.GPIO as gpio
 import iio
 import time
@@ -42,8 +43,10 @@ def db_log(client, measurements):
     print(client.write_points(points))
 
 def main():
-    with open('botani.conf') as f:
-        config = json.loads(f.read())
+    config = {}
+    for arg in sys.argv[1:]:
+        with open(arg) as f:
+            config.update(json.loads(f.read()))
 
     ctx = iio.Context()
     devs = list(filter(lambda dev: dev.name == "ads1015", ctx.devices))

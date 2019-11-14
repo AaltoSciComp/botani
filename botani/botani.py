@@ -7,6 +7,7 @@ import time
 import datetime
 from influxdb import InfluxDBClient
 import json
+import logging
 
 ADS_1115_SCALE = '0.1875'
 
@@ -39,10 +40,11 @@ def db_log(client, measurements):
         }
         points.append(point)
 
-    print(points)
-    print(client.write_points(points))
+    logging.debug(points)
+    logging.debug(client.write_points(points))
 
 def main():
+    logging.basicConfig(level=logging.INFO)
     config = {}
     for arg in sys.argv[1:]:
         with open(arg) as f:
@@ -51,7 +53,7 @@ def main():
     ctx = iio.Context()
     devs = list(filter(lambda dev: dev.name == "ads1015", ctx.devices))
     if (len(devs) == 0):
-        print("no iio devices found")
+        logging.error("no iio devices found")
 
     gpio.setmode(gpio.BOARD)
     gpio.setup(config['sensor_power_gpio'], gpio.OUT)
@@ -66,7 +68,7 @@ def main():
     try:
         while True:
             moisture_data = sample_plants(devs, config)
-            print(moisture_data)
+            logging.debug(moisture_data)
 
             db_log(client, moisture_data)
             time.sleep(config['sampling_interval'])

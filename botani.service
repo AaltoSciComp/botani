@@ -2,8 +2,7 @@
 Description = Botani measurement service
 
 [Service]
-# XXX Assumes default setup.py PREFIX
-ExecStart = /usr/local/bin/botani /etc/botani-plants.conf /etc/botani-influxdb.conf
+ExecStart = /usr/local/bin/botani /etc/botani/plants.conf /etc/botani/influxdb.conf
 
 [Install]
 WantedBy = multi-user.target

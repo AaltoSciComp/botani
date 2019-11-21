@@ -3,6 +3,8 @@ Description = Botani measurement service
 
 [Service]
 ExecStart = /usr/local/bin/botani /etc/botani/plants.conf /etc/botani/influxdb.conf
+Restart=on-failure
+RestartSec=5s
 
 [Install]
 WantedBy = multi-user.target

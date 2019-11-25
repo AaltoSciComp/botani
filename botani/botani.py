@@ -22,7 +22,8 @@ def sample_plants(devs, config):
     for plant in config['plants']:
         dev = devs[plant['sensor']]
         chan = dev.channels[plant['channel']]
-        results[plant['name']] = float(chan.attrs['raw'].value)
+        val = float(chan.attrs['raw'].value)
+        results[plant['name']] = val - plant['baseline']
 
     gpio.output(config['sensor_power_gpio'], gpio.LOW)
 

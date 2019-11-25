@@ -9,16 +9,19 @@ from influxdb import InfluxDBClient
 import json
 import logging
 
-ADS_1115_SCALE = '0.1875'
-
 def sample_plants(devs, config):
     gpio.output(config['sensor_power_gpio'], gpio.HIGH)
     time.sleep(1.0)
 
+    for plant in config['plants']:
+        dev = devs[plant['sensor']]
+        chan = dev.channels[plant['channel']]
+        chan.attrs['scale'].value = str(plant['scale'])
+
     results = {}
     for plant in config['plants']:
-        chan = devs[plant['sensor']].channels[plant['channel']]
-        chan.attrs['scale'].value = ADS_1115_SCALE
+        dev = devs[plant['sensor']]
+        chan = dev.channels[plant['channel']]
         results[plant['name']] = float(chan.attrs['raw'].value)
 
     gpio.output(config['sensor_power_gpio'], gpio.LOW)

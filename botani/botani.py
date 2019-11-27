@@ -9,6 +9,8 @@ from influxdb import InfluxDBClient
 import json
 import logging
 
+MAX_CONNECT_RETRIES = 10
+
 def sample_plants(devs, config):
     gpio.output(config['sensor_power_gpio'], gpio.HIGH)
     time.sleep(1.0)
@@ -62,7 +64,13 @@ def main():
     gpio.setmode(gpio.BOARD)
     gpio.setup(config['sensor_power_gpio'], gpio.OUT)
 
-    client = InfluxDBClient(**config['influxdb'])
+    while i in range(MAX_CONNECT_RETRIES):
+        try:
+            client = InfluxDBClient(**config['influxdb'])
+            break
+        except requests.exceptions.ConnectionError:
+            time.sleep((i + 1) * 5)
+            continue
 
     db_name = config['influxdb']['database']
     if {'name': db_name} not in client.get_list_database():
